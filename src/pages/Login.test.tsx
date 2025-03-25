@@ -104,6 +104,13 @@ describe('page loading', () => {
 
         fireEvent.click(loginButton);
 
+        waitFor(() => {
+            //expect token to be stored in local storage
+            expect(localStorage.getItem('token')).toBe('test-token');
+
+            // expect to navigate to /taskmanager
+            expect(window.location.pathname).toBe('/taskmanager');
+        })
 
     });
 
@@ -126,10 +133,14 @@ describe('page loading', () => {
         const passwordInput = screen.getByLabelText('password');
         const loginButton = screen.getByText('Login');
 
-        fireEvent.change(emailInput, { target: { value: 'test' } });
+        fireEvent.change(emailInput, { target: { value: 'test@ffdf.c' } });
         fireEvent.change(passwordInput, { target: { value: 'testpassword' }});
 
         fireEvent.click(loginButton);
+
+        await waitFor(() => {
+            expect(window.alert).toHaveBeenCalledWith('Something went wrong, maybe Invalid email or password or Internal server error');
+        });
 
     });
 
@@ -157,6 +168,10 @@ describe('page loading', () => {
         fireEvent.change(passwordInput, { target: { value: 'ambasing' }});
 
         fireEvent.click(loginButton);
+
+        await waitFor(() => {
+            expect(window.alert).toHaveBeenCalledWith('Something went wrong, maybe Invalid email or password or Internal server error');
+        });
 
     })
 
