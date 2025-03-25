@@ -6,14 +6,17 @@ export const getAllUserTasks = async () => {
             Authorization: `Bearer ${localStorage.getItem('token')}`
         }  
     });
+    console.log(res.data);
+    
     return res.data;
 }
 
-export const createTask = async (title: string, description: string, status: string) => {
+export const createTask = async (title: string, description: string, userId: string, status: string) => {
     const res = await axiosInstance.post('/tasks', {
         title,
         description,
-        status
+        status,
+        userId
     }, {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -22,11 +25,13 @@ export const createTask = async (title: string, description: string, status: str
     return res.data;
 }
 
-export const updateTask = async (id: string, title: string, description: string, status: string) => {
+export const updateTask = async (id: string, title: string, description: string, userId: string, status: string) => {
     const res = await axiosInstance.patch(`/tasks/${id}`, {
+        id,
         title,
         description,
-        status
+        status,
+        userId
     }, {
         headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`

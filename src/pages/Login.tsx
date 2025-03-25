@@ -34,40 +34,41 @@ export default function Login({}: Props) {
       const email = formik.values.email;
       const password = formik.values.password;
 
-      performLogin(email, password).then((res) => {
-        console.log(res);
-        switch (res.statusCode) {
-          case 200:
-          case 201:
-            // Redirect to TaskManager page
-            // Inside your component, add this line near the top:
-
-            // And in the success case:
-            navigate('/taskmanager');
-            alert('Login success');
-            // set token to local storage
-            localStorage.setItem('token', res.data.access_token);
-
-            break;
-          case 400:
-            // Show error message
-            alert('Invalid email or password');          
-            break;
-          case 500:
-            // Show error message
-            alert('Internal server error');
-            break;
-        
-          default:
-            alert('Something went wrong');
-            break;
-        }
-      });
+      const handleLogin = async () => {
+        // try {
+          const res = await performLogin(email, password);
+          switch (res.statusCode) {
+            case 200:
+              navigate('/taskmanager');
+              localStorage.setItem('token', res.data.access_token);
+              break;
+            // case 401:
+            //   alert('Invalid email or password');
+            //   break;
+            // case 500:
+            //   alert('Internal server error');
+            //   break;
+            default:
+              alert('Something went wrong, maybe Invalid email or password or Internal server error');
+              break;
+          }
+      //   } catch (error) {
+      //     console.error('Login failed:', error);
+      //     alert('An unexpected error occurred');
+      //   } finally {
+          setIsSendLoginRequest(false);
+      //   }
+      };
+  
+      handleLogin();
       
-      setIsSendLoginRequest(false);
     }
     
   }, [setIsSendLoginRequest, isSendLoginRequest, formik.isSubmitting]);
+
+  useEffect(() => {
+    localStorage.removeItem('token');
+  }, []);
 
   return (
     <main className = "flex flex-col items-center justify-center h-screengap-2">

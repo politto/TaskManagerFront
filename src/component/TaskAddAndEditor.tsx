@@ -1,83 +1,89 @@
 import React, { useState, useEffect } from 'react'
 import { Tasks } from '../types/Tasks';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-
+import { FormikProps } from 'formik';
 
 type Props = {
-    tasks: Tasks;
-    onSave: (task: Tasks) => void;
-    onCancel: () => void;
-    isOpen: boolean;
-    setIsOpen: (isOpen: boolean) => void;
+    formik: FormikProps<Tasks>;
+    isModalOpen: boolean;
+    setIsModalOpen: (isModalOpen: boolean) => void;
 }
 
-export default function TaskAddAndEditor({tasks, onSave, onCancel, isOpen, setIsOpen}: Props) {
-  const [formData, setFormData] = useState<Tasks>(tasks);
+export default function TaskAddAndEditor({formik, isModalOpen, setIsModalOpen}: Props) {
+
 
   useEffect(() => {
-    setFormData(tasks);
-  }, [tasks]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name as string]: value });
-  };
-
-  const handleSubmit = () => {
-    onSave(formData);
-  };
+    
+    return () => {
+        
+    };
+  }, [isModalOpen]);
+  
 
   return (
-    <Dialog open={isOpen} onClose={onCancel} maxWidth="sm" fullWidth className="rounded-lg">
-      <DialogTitle className="bg-blue-50 text-blue-800 font-semibold">
-        {tasks.id ? 'Edit Task' : 'Add New Task'}
+    <Dialog open={isModalOpen} 
+    onClose={() => setIsModalOpen(false)}
+     maxWidth="sm" fullWidth className="rounded-lg">
+        <form onSubmit={(e) => {
+          e.preventDefault(); // Prevent default form submission
+          formik.handleSubmit();
+        }}>
+      <DialogTitle className="bg-blue-50 text-blue-800 font-semibold ">
+        {formik.values.id ? 'Edit Task' : 'Add New Task'}
       </DialogTitle>
-      <DialogContent className="mt-4">
+      <DialogContent className="mt-4 gap-4 m-4">
         <div className="space-y-4 my-2">
           <TextField
             fullWidth
             label="Title"
             name="title"
-            value={formData.title || ''}
-            onChange={handleChange}
+            value={formik.values.title || ''}
             variant="outlined"
-            className="mb-4"
+            className="mb-8"
+            onChange={formik.handleChange}
           />
+          {formik.touched.title && formik.errors.title ? ( <div className = "text-red-500">{formik.errors.title}</div> ) : null}
           
           <TextField
             fullWidth
             label="Description"
             name="description"
-            value={formData.description || ''}
-            onChange={handleChange}
+            value={formik.values.description || ''}
             variant="outlined"
             multiline
             rows={4}
-            className="mb-4"
+            className="mb-8"
+            onChange={formik.handleChange}
           />
+
+          {formik.touched.description && formik.errors.description ? ( <div className = "text-red-500">{formik.errors.description}</div> ) : null}
           
           <FormControl fullWidth variant="outlined">
             <InputLabel>Status</InputLabel>
             <Select
               name="status"
-              value={formData.status || 'in_progress'}
-              onChange={handleChange}
+              value={formik.values.status || 'in_progress'}
               label="Status"
+              onChange={formik.handleChange}
             >
-              <MenuItem value="in_progress">In Progress</MenuItem>
+              <MenuItem value="in_progress" selected>In Progress</MenuItem>
               <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
             </Select>
           </FormControl>
+
+          {formik.touched.status && formik.errors.status ? ( <div className = "text-red-500">{formik.errors.status}</div> ) : null}
         </div>
       </DialogContent>
       <DialogActions className="p-4 bg-gray-50">
-        <Button onClick={onCancel} variant="outlined" className="mr-2">
+        <Button onClick={() => setIsModalOpen(false)} variant="outlined" className="mr-2">
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
+        <Button type="submit" variant="contained" color="primary">
           Save
         </Button>
       </DialogActions>
+      </form>
     </Dialog>
   )
 }

@@ -1,11 +1,12 @@
 # Front-end setup instruction(must be done after backend and database setup)
-  1. npm i or bun i
-  2. npm run dev or bun dev
-  3. go to browser and porceed to localhost:3000/login
-  4. two user accounts can be used to log in and test this web application
+  1. CONTACT via email: eakacit@gmail.com FOR .env file(clearly important file), when recieved it, then paste it to root porject folder
+  2. run npm i or bun i in your terminal
+  3. npm run dev or bun dev
+  4. go to browser and proceed to localhost:5173/login
+  5. two user accounts can be used to log in and test this web application
     4.1 dd@gmail.com for email and password for password(yes just password)
     4.2 omaygot@ambatukam.oh for email and ambasing for password 
-  5. perform adding, editing, deleting, viewing tasks by yourself!
+  6. perform adding, editing, deleting, viewing tasks by yourself!
 
 # Front-end key architectural decisions.
   1. Page design
