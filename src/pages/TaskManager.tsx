@@ -138,6 +138,7 @@ export default function TaskManager({}: Props) {
       </div>
       <div>
         <button className = "bg-blue-500 text-white my-1 h-[80%] text-center flex justify-center items-center rounded-md"
+        aria-label='Add Task'
         onClick={() => {
           setIsModalOpen(true)
           formik.setValues({

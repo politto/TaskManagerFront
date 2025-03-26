@@ -37,6 +37,8 @@ export default function TaskAddAndEditor({formik, isModalOpen, setIsModalOpen}: 
             fullWidth
             label="Title"
             name="title"
+            aria-label='Title'
+            data-testid="title-input"  // Add this line
             value={formik.values.title || ''}
             variant="outlined"
             className="mb-8"
@@ -48,6 +50,7 @@ export default function TaskAddAndEditor({formik, isModalOpen, setIsModalOpen}: 
             fullWidth
             label="Description"
             name="description"
+            data-testid="description-input"  // Add this line
             value={formik.values.description || ''}
             variant="outlined"
             multiline
@@ -63,8 +66,9 @@ export default function TaskAddAndEditor({formik, isModalOpen, setIsModalOpen}: 
             <Select
               name="status"
               value={formik.values.status || 'in_progress'}
-              label="Status"
+              aria-label='Status'
               onChange={formik.handleChange}
+              data-testid="status-select"  // Add this line
             >
               <MenuItem value="in_progress" selected>In Progress</MenuItem>
               <MenuItem value="completed">Completed</MenuItem>

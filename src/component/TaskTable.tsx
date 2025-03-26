@@ -14,7 +14,7 @@ type Props = {
 };
 const paginationModel = { page: 0, pageSize: 5 };
 
-export default function DataTable({ formik, isModalOpen, setIsModalOpen, onDeleteTask, tasks }: Props) {
+export default function DataTable({ formik, isModalOpen, setIsModalOpen, onDeleteTask, tasks = [] }: Props) {
   console.log(tasks);
 
   const columns: GridColDef[] = [
@@ -77,9 +77,6 @@ export default function DataTable({ formik, isModalOpen, setIsModalOpen, onDelet
     },
   ];
   
-  const rows = [
-    { id: 1, title: 'Task 1', description: 'Description 1', status: 'Done' },
-  ];
   
   return (
     <Paper sx={{ height: 400, width: '100%' }}>
