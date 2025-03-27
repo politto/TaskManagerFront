@@ -20,6 +20,10 @@
     TaskManager.tsx has TaskAddAndUpdate.tsx and TaskTable.tsx as its children.
 
     each component will just do their specific job, loosely coupled with anther components, easier to understand and fix.
+
+  3. Test design
+    Designed to be as many coverage as possible, so some test file may have many test cases. and complicated testing code.
+    (And also because of using MUI components, very very long time used to adjust the test and it comes with very complicated code)
   
 
 
