@@ -96,7 +96,6 @@ export default function TaskManager({}: Props) {
     (async () => {
       if (deleteTrigger) {
         // handle delete task
-        alert(formik.values.id);
         await deleteTask(formik.values.id); 
         setUserTasks(userTasks.filter(task => task.id !== formik.values.id));
         setDeleteTrigger(false);
@@ -113,10 +112,8 @@ export default function TaskManager({}: Props) {
     useEffect(() => {
       
       if (!token || token === 'undefined') {
-        // redirect to login page
-        // Inside your component, add this line near the top:
         alert('You are not authorized to access this page');
-        // navigate('/login');
+        navigate('/login');
       }
       
       else console.log('Token found:', token);

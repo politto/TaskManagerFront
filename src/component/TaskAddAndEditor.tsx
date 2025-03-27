@@ -22,6 +22,7 @@ export default function TaskAddAndEditor({formik, isModalOpen, setIsModalOpen}: 
 
   return (
     <Dialog open={isModalOpen} 
+    aria-label='Task Add and Editor'
     onClose={() => setIsModalOpen(false)}
      maxWidth="sm" fullWidth className="rounded-lg">
         <form onSubmit={(e) => {

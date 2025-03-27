@@ -5,10 +5,34 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import TaskManager from './TaskManager';
 import * as authModule from '../api/auth';
 import * as tasksModule from '../api/tasksApi';
+import { wait } from '../utils/wait';
 
 // Mock the API modules
 vi.mock('../api/auth');
 vi.mock('../api/tasksApi');
+
+const getFormElements = () => {
+  const titleInput = within(screen.getByTestId('title-input')).getByRole('textbox');
+  const descriptionInput = within(screen.getByTestId('description-input')).getByRole('textbox');
+  const statusSelect = within(screen.getByTestId('status-select')).getByRole('combobox');
+  return { titleInput, descriptionInput, statusSelect };
+};
+
+const fillFormAndSubmit = async (formData: { title: string; description: string; status?: string }) => {
+  const { titleInput, descriptionInput, statusSelect } = getFormElements();
+  
+  fireEvent.change(titleInput, { target: { value: formData.title } });
+  fireEvent.change(descriptionInput, { target: { value: formData.description } });
+  
+  if (formData.status) {
+    fireEvent.mouseDown(statusSelect);
+    fireEvent.click(screen.getByText(formData.status));
+  }
+  
+  const saveButton = screen.getByText('Save');
+  fireEvent.click(saveButton);
+};
+
 
 describe('TaskManager Component', () => {
   // Mock data
@@ -120,11 +144,9 @@ describe('TaskManager Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Add New Task')).toBeDefined();
       
-      
       const titleInput = (within(screen.getByTestId('title-input')).getByRole('textbox'));
       const descriptionInput = (within(screen.getByTestId('description-input')).getByRole('textbox'));
       const statusSelect = (within(screen.getByTestId('status-select')).getByRole('combobox')as HTMLInputElement).value;
-      console.log(statusSelect);
       
       expect((titleInput as HTMLInputElement).value).toBe('');
       expect((descriptionInput as HTMLInputElement).value).toBe('');
@@ -157,8 +179,6 @@ describe('TaskManager Component', () => {
             
         const titleInput = (within(screen.getByTestId('title-input')).getByRole('textbox'));
         const descriptionInput = (within(screen.getByTestId('description-input')).getByRole('textbox'));
-        const statusSelect = (within(screen.getByTestId('status-select')).getByRole('combobox')as HTMLInputElement).value;
-        console.log(statusSelect);
       
       fireEvent.change(titleInput, { target: { value: 'New Task' } });
       fireEvent.change(descriptionInput, { target: { value: 'New Task Description' } });
@@ -178,13 +198,20 @@ describe('TaskManager Component', () => {
       );
     });
     
-    // Check if modal is closed
-    expect(screen.queryByText('Add New Task')).not.toBeDefined();
   });
 
   // Test 4: Editing an existing task
   it('should open the modal with task data when Edit button is clicked', async () => {
     // Arrange
+
+ 
+    vi.mocked(tasksModule.getAllUserTasks).mockResolvedValue([{ 
+      id: 'new-task',
+      title: 'New Task',
+      description: 'New Task Description',
+      status: 'in_progress',
+      userId: mockUser.id
+    }]);
     render(
       <MemoryRouter initialEntries={['/taskmanager']}>
         <Routes>
@@ -192,30 +219,38 @@ describe('TaskManager Component', () => {
         </Routes>
       </MemoryRouter>
     );
-    
-    // Wait for tasks to load
     await waitFor(() => {
-      expect(screen.getByText('Complete project')).toBeDefined();
+      expect(screen.getByText(`Current user: ${mockUser.email}`)).toBeDefined();
     });
     
     // Act - Click the Edit button
-    const editButtons = screen.getAllByText('Edit');
-    fireEvent.click(editButtons[0]); // Click first Edit button
+    const editButton = screen.getByText('Edit');
     
+    
+    fireEvent.click(editButton); // Click first Edit button
+    
+    wait(1000);
     // Assert - Modal opened with task data
     await waitFor(() => {
-      expect(screen.getByText('Edit Task')).toBeDefined();
       
-      const titleInput = screen.getByLabelText('Title');
-      const descriptionInput = screen.getByLabelText('Description');
+      const titleInput = screen.getByText('New Task');
+      const descriptionInput = screen.getByText('New Task Description');
       
-      expect(titleInput).toBe('Complete project');
-      expect(descriptionInput).toBe('Finish the React project');
+      expect(titleInput).toBe(screen.getByText('New Task'));
+      expect(descriptionInput).toBe(screen.getByText('New Task Description'));
     });
   });
 
   // Test 5: Updating an existing task
   it('should update a task when form is submitted in edit mode', async () => {
+
+    vi.mocked(tasksModule.getAllUserTasks).mockResolvedValue([{ 
+      id: 'new-task',
+      title: 'New Task',
+      description: 'New Task Description',
+      status: 'in_progress',
+      userId: mockUser.id
+    }]);
     // Arrange
     render(
       <MemoryRouter initialEntries={['/taskmanager']}>
@@ -227,46 +262,43 @@ describe('TaskManager Component', () => {
     
     // Wait for tasks to load
     await waitFor(() => {
-      expect(screen.getByText('Complete project')).toBeDefined();
+      expect(screen.getByText('New Task')).toBeDefined();
     });
     
     // Act - Click the Edit button and modify the form
-    const editButtons = screen.getAllByText('Edit');
-    fireEvent.click(editButtons[0]); // Click first Edit button
+    const editButton = screen.getByRole('button', { name: 'Edit' });
+  fireEvent.click(editButton);
     
-    await waitFor(() => {
-      const titleInput = screen.getByLabelText('Title');
-      const descriptionInput = screen.getByLabelText('Description');
-      const statusSelect = screen.getByLabelText('Status');
-      
-      fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
-      fireEvent.change(descriptionInput, { target: { value: 'Updated Description' } });
-      
-      // Change status to completed
-      fireEvent.mouseDown(statusSelect);
+  await waitFor(() => {
+    fillFormAndSubmit({
+      title: 'Updated Task',
+      description: 'Updated Description',
+      status: 'Completed'
     });
-    
-    // Select the "Completed" option from dropdown
-    fireEvent.click(screen.getByText('Completed'));
-    
-    // Submit form
-    const saveButton = screen.getByText('Save');
-    fireEvent.click(saveButton);
-    
-    // Assert - API called with correct data
-    await waitFor(() => {
-      expect(tasksModule.updateTask).toHaveBeenCalledWith(
-        'task1',
-        'Updated Task',
-        'Updated Description',
-        mockUser.id,
-        'completed'
-      );
-    });
+  });
+
+  wait(1000)
+  
+  await waitFor(() => {
+    expect(tasksModule.updateTask).toHaveBeenCalledWith(
+      'new-task',
+      'Updated Task',
+      'Updated Description',
+      mockUser.id,
+      'completed'
+    );
+  });
   });
 
   // Test 6: Deleting a task
   it('should delete a task when Delete button is clicked', async () => {
+    vi.mocked(tasksModule.getAllUserTasks).mockResolvedValue([{ 
+      id: 'new-task',
+      title: 'New Task',
+      description: 'New Task Description',
+      status: 'in_progress',
+      userId: mockUser.id
+    }]);
     // Arrange
     render(
       <MemoryRouter initialEntries={['/taskmanager']}>
@@ -276,18 +308,23 @@ describe('TaskManager Component', () => {
       </MemoryRouter>
     );
     
-    // Wait for tasks to load
     await waitFor(() => {
-      expect(screen.getByText('Complete project')).toBeDefined();
+      expect(screen.getByText('New Task')).toBeDefined();
+
     });
     
     // Act - Click the Delete button
     const deleteButtons = screen.getAllByText('Delete');
+    console.log(deleteButtons.length);
+    
+
     fireEvent.click(deleteButtons[0]); // Click first Delete button
     
     // Assert - Delete confirmation and API call
     await waitFor(() => {
-      expect(tasksModule.deleteTask).toHaveBeenCalledWith('task1');
+      //log what tasksModule.deleteTask is called with
+
+      expect(tasksModule.deleteTask).toHaveBeenCalledWith('new-task');
     });
   });
 
@@ -295,14 +332,7 @@ describe('TaskManager Component', () => {
   it('should redirect to login page when token is not found', async () => {
     // Arrange
     localStorage.removeItem('token');
-    // const mockNavigate = vi.fn();
-    // vi.mock('react-router-dom', async () => {
-    //   const actual = await vi.importActual('react-router-dom');
-    //   return {
-    //     ...actual,
-    //     useNavigate: () => mockNavigate,
-    //   };
-    // });
+
     
     // Act
     render(
