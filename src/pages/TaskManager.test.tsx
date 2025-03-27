@@ -6,11 +6,21 @@ import TaskManager from './TaskManager';
 import * as authModule from '../api/auth';
 import * as tasksModule from '../api/tasksApi';
 import { wait } from '../utils/wait';
+import * as router from 'react-router-dom';
 
 // Mock the API modules
 vi.mock('../api/auth');
 vi.mock('../api/tasksApi');
 
+const mockNavigate = vi.fn();
+// Update the router mock at the top of the file
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate
+  };
+});
 const getFormElements = () => {
   const titleInput = within(screen.getByTestId('title-input')).getByRole('textbox');
   const descriptionInput = within(screen.getByTestId('description-input')).getByRole('textbox');
@@ -314,11 +324,12 @@ describe('TaskManager Component', () => {
     });
     
     // Act - Click the Delete button
-    const deleteButtons = screen.getAllByText('Delete');
-    console.log(deleteButtons.length);
+    const deleteButton = screen.getByRole('button', { name: 'Delete' });
     
+    fireEvent.click(deleteButton); // Click first Delete button
 
-    fireEvent.click(deleteButtons[0]); // Click first Delete button
+    await wait(100);
+    console.log('deleteTask mock calls:', vi.mocked(tasksModule.deleteTask).mock.calls);
     
     // Assert - Delete confirmation and API call
     await waitFor(() => {
@@ -330,25 +341,29 @@ describe('TaskManager Component', () => {
 
   // Test 7: Unauthorized access (no token)
   it('should redirect to login page when token is not found', async () => {
-    // Arrange
-    localStorage.removeItem('token');
+    const mockNavigate = vi.fn();
+    vi.spyOn(router, 'useNavigate').mockImplementation(() => mockNavigate);
+    
+    // Remove token
+  localStorage.removeItem('token');
 
-    
-    // Act
-    render(
-      <MemoryRouter initialEntries={['/taskmanager']}>
-        <Routes>
-          <Route path="/taskmanager" element={<TaskManager />} />
-        </Routes>
-      </MemoryRouter>
-    );
-    
-    // Assert - Alert shown and redirection attempted
-    await waitFor(() => {
-      expect(window.alert).toHaveBeenCalledWith('You are not authorized to access this page');
-      // Note: In your actual code, the navigation is commented out
-      // If you uncomment it, you should test: expect(mockNavigate).toHaveBeenCalledWith('/login');
-    });
+  // Act
+  render(
+    <MemoryRouter initialEntries={['/taskmanager']}>
+      <Routes>
+        <Route path="/taskmanager" element={<TaskManager />} />
+      </Routes>
+    </MemoryRouter>
+  );
+
+  // Assert
+  await waitFor(() => {
+    expect(localStorage.getItem('token')).toBeNull();
+    expect(mockNavigate).toHaveBeenCalledWith('/login');
+  });
+
+  // Cleanup
+  vi.restoreAllMocks();
   });
 
   // Test 8: Error handling when API calls fail
