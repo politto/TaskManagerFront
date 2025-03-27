@@ -329,7 +329,6 @@ describe('TaskManager Component', () => {
     fireEvent.click(deleteButton); // Click first Delete button
 
     await wait(100);
-    console.log('deleteTask mock calls:', vi.mocked(tasksModule.deleteTask).mock.calls);
     
     // Assert - Delete confirmation and API call
     await waitFor(() => {
@@ -370,14 +369,6 @@ describe('TaskManager Component', () => {
   it('should handle API errors gracefully', async () => {
     // Arrange - Force API error
     vi.mocked(authModule.getUserDataFromToken).mockRejectedValue(new Error('API Error'));
-    // const mockNavigate = vi.fn();
-    // vi.mock('react-router-dom', async () => {
-    //   const actual = await vi.importActual('react-router-dom');
-    //   return {
-    //     ...actual,
-    //     useNavigate: () => mockNavigate,
-    //   };
-    // });
     
     // Act
     render(

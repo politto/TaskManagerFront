@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import { Tasks } from '../types/Tasks';
@@ -14,7 +13,7 @@ type Props = {
 };
 const paginationModel = { page: 0, pageSize: 5 };
 
-export default function DataTable({ formik, isModalOpen, setIsModalOpen, onDeleteTask, tasks = [] }: Props) {
+export default function DataTable({ formik,  setIsModalOpen, onDeleteTask, tasks = [] }: Props) {
   console.log(tasks);
 
   const columns: GridColDef[] = [
