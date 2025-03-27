@@ -45,6 +45,36 @@ describe('Auth API', () => {
         });
     });
 
+    it('should handle network error without response object', async () => {
+        // Arrange
+        const mockError = new Error('Network Error');
+        vi.mocked(axiosInstance.post).mockRejectedValue(mockError);
+  
+        // Act
+        const result = await performLogin('test@example.com', 'password123');
+  
+        // Assert
+        expect(result).toEqual({
+          data: { message: 'Network Error' },
+          statusCode: 500
+        });
+      });
+
+      it('should handle undefined error response', async () => {
+        // Arrange
+        const mockError = { message: 'Unknown error' };
+        vi.mocked(axiosInstance.post).mockRejectedValue(mockError);
+  
+        // Act
+        const result = await performLogin('test@example.com', 'password123');
+  
+        // Assert
+        expect(result).toEqual({
+          data: { message: 'Unknown error' },
+          statusCode: 500
+        });
+      });
+
     it('should handle login failure', async () => {
       // Arrange
       const mockError = {
