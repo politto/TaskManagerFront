@@ -1,6 +1,5 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, beforeAll } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import TaskManager from './TaskManager';
 import * as authModule from '../api/auth';
@@ -21,6 +20,12 @@ vi.mock('react-router-dom', async () => {
     useNavigate: () => mockNavigate
   };
 });
+
+// Mock window.alert
+beforeAll(() => {
+  vi.spyOn(window, 'alert').mockImplementation(() => {});
+});
+
 const getFormElements = () => {
   const titleInput = within(screen.getByTestId('title-input')).getByRole('textbox');
   const descriptionInput = within(screen.getByTestId('description-input')).getByRole('textbox');
@@ -113,6 +118,7 @@ describe('TaskManager Component', () => {
     // Assert - Basic UI elements
     expect(screen.getByText('TaskManager')).toBeDefined();
     expect(screen.getByText('Add Task')).toBeDefined();
+    expect(screen.getByText("You may refresh this website if the tasks you created did't shown up")).toBeDefined();
     
     // Assert - User data and tasks loaded
     await waitFor(() => {
@@ -126,8 +132,8 @@ describe('TaskManager Component', () => {
     });
     
     // Verify API calls
-    expect(authModule.getUserDataFromToken).toHaveBeenCalledTimes(2);
-    expect(tasksModule.getAllUserTasks).toHaveBeenCalledTimes(2);
+    expect(authModule.getUserDataFromToken).toHaveBeenCalledTimes(1);
+    expect(tasksModule.getAllUserTasks).toHaveBeenCalledTimes(1);
   });
 
   // Test 2: Opening the Add Task modal
@@ -368,7 +374,16 @@ describe('TaskManager Component', () => {
   // Test 8: Error handling when API calls fail
   it('should handle API errors gracefully', async () => {
     // Arrange - Force API error
-    vi.mocked(authModule.getUserDataFromToken).mockRejectedValue(new Error('API Error'));
+    vi.mocked(authModule.getUserDataFromToken).mockResolvedValue({
+      statusCode: 500,
+      data: { 
+        id: "error",
+        email: "error",
+        password: "error"
+       }
+
+    });
+    
     
     // Act
     render(

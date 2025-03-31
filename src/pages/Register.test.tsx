@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
-import Login from './Login';
 import { fireEvent, render, screen, cleanup, waitFor } from '@testing-library/react';
 import { wait } from '../utils/wait';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import * as authModule from '../api/auth';
+import Register from './Register';
 
 // Mock the entire auth module
 vi.mock('../api/auth');
@@ -20,21 +20,21 @@ describe('page loading', () => {
 
     it('should load the login page', async () => {
         render(
-            <MemoryRouter initialEntries={['/login']}>
+            <MemoryRouter initialEntries={['/register']}>
                 <Routes>
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                 </Routes>
             </MemoryRouter>
         );
         
         const emailInput = screen.getByLabelText('email');
         const passwordInput = screen.getByLabelText('password');
-        const loginButton = screen.getByText('Login');
+        const registerButton = screen.getByText('Register');
 
 
         expect(emailInput).toBeDefined();
         expect(passwordInput).toBeDefined();
-        expect(loginButton).toBeDefined();
+        expect(registerButton).toBeDefined();
 
         fireEvent.blur(emailInput);
         fireEvent.blur(passwordInput);
@@ -51,9 +51,9 @@ describe('page loading', () => {
 
     it('should validate email and password properly', async () => {
         render(
-            <MemoryRouter initialEntries={['/login']}>
+            <MemoryRouter initialEntries={['/register']}>
                 <Routes>
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                 </Routes>
             </MemoryRouter>
         );
@@ -87,21 +87,21 @@ describe('page loading', () => {
           });
 
         render(
-            <MemoryRouter initialEntries={['/login']}>
+            <MemoryRouter initialEntries={['/register']}>
                 <Routes>
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                 </Routes>
             </MemoryRouter>
         );
 
         const emailInput = screen.getByLabelText('email');
         const passwordInput = screen.getByLabelText('password');
-        const loginButton = screen.getByText('Login');
+        const registerButton = screen.getByText('Register');
 
         fireEvent.change(emailInput, { target: { value: 'omaygot@ambatukam.oh' } });
         fireEvent.change(passwordInput, { target: { value: 'ambasing' }});
 
-        fireEvent.click(loginButton);
+        fireEvent.click(registerButton);
 
         waitFor(() => {
             //expect token to be stored in local storage
@@ -113,57 +113,28 @@ describe('page loading', () => {
 
     });
 
-    it('should alert error message on invalid email or password', async () => {
-        
-        
-        vi.mocked(authModule.performLogin).mockResolvedValue({
-            statusCode: 401,
-            data: { message: 'Invalid email or password' },
-          });
-        render(
-            <MemoryRouter initialEntries={['/login']}>
-                <Routes>
-                    <Route path="/login" element={<Login />} />
-                </Routes>
-            </MemoryRouter>
-        );
-
-        const emailInput = screen.getByLabelText('email');
-        const passwordInput = screen.getByLabelText('password');
-        const loginButton = screen.getByText('Login');
-
-        fireEvent.change(emailInput, { target: { value: 'test@ffdf.c' } });
-        fireEvent.change(passwordInput, { target: { value: 'testpassword' }});
-
-        fireEvent.click(loginButton);
-
-        await waitFor(() => {
-            expect(window.alert).toHaveBeenCalledWith('Something went wrong:Invalid email or password');
-        });
-
-    });
-
     it('should alert error message on internal server error', async () => {
-        vi.mocked(authModule.performLogin).mockResolvedValue({ 
+        vi.mocked(authModule.performRegister).mockResolvedValue({ 
             statusCode: 500,
             data: { message: 'Internal server error' },
         });
+
         render(
-            <MemoryRouter initialEntries={['/login']}>
+            <MemoryRouter initialEntries={['/register']}>
                 <Routes>
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                 </Routes>
             </MemoryRouter>
         );
 
         const emailInput = screen.getByLabelText('email');
         const passwordInput = screen.getByLabelText('password');
-        const loginButton = screen.getByText('Login');
+        const registerButton = screen.getByText('Register');
 
         fireEvent.change(emailInput, { target: { value: 'omaygot@ambatukam.oh' } });
         fireEvent.change(passwordInput, { target: { value: 'ambasing' }});
 
-        fireEvent.click(loginButton);
+        fireEvent.click(registerButton);
 
         await waitFor(() => {
             expect(window.alert).toHaveBeenCalledWith('Something went wrong:Internal server error');

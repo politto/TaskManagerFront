@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TaskTable from '../component/TaskTable';
 import * as yup from 'yup'
-import { Formik, Form, Field, ErrorMessage, useFormik } from 'formik'
+import {  useFormik } from 'formik'
 import { Users } from '../types/Users';
 import { getUserDataFromToken } from '../api/auth';
 import { Tasks } from '../types/Tasks';
@@ -90,7 +90,7 @@ export default function TaskManager({}: Props) {
     }
     getUserDataAndTasks();
     
-  }, [formik.isSubmitting, formik.values]);
+  }, [formik.isSubmitting, formik.values.status, formik.values.description, isModalOpen]);
 
   useEffect(() => {
     (async () => {
@@ -120,11 +120,6 @@ export default function TaskManager({}: Props) {
     }, []);
     
 
-  const handleCreateTask = async () => {
-    // handle create task
-    
-  }
-
 
   //contuunue with the rest of the component
   return (
@@ -132,6 +127,7 @@ export default function TaskManager({}: Props) {
       <div className = "p-4">
         <h1 className = "text-2xl text-blue-700">TaskManager</h1>
         <p className = "text-xl">Current user: {user.email}</p>
+        <p className = "text-xl">You may refresh this website if the tasks you created did't shown up</p>
       </div>
       <div>
         <button className = "bg-blue-500 text-white my-1 h-[80%] text-center flex justify-center items-center rounded-md"

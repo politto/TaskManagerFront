@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { performLogin, getUserDataFromToken } from './auth';
 import axiosInstance from '../utils/axios';
 import { waitFor } from '@testing-library/react';
 import { createTask, deleteTask, getAllUserTasks, updateTask } from './tasksApi';
@@ -64,7 +63,6 @@ describe('Tasks API', () => {
     
         // Act
         const result = await createTask('Task 3', 'Description 3', '1', 'completed');
-        await wait(1000);
         
         
         waitFor(() => {

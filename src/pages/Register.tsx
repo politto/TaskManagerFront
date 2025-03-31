@@ -1,14 +1,14 @@
 import * as yup from 'yup'
 import { useFormik } from 'formik'
 import { useEffect, useState } from 'react';
-import { performLogin } from '../api/auth';
+import { performRegister } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 
 type Props = {}
 
-export default function Login({}: Props) {
+export default function Register({}: Props) {
   const navigate = useNavigate();
-  const [isSendLoginRequest, setIsSendLoginRequest] = useState(false);
+  const [isSendRegisterRequest, setIsSendRegisterRequest] = useState(false);
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -22,36 +22,36 @@ export default function Login({}: Props) {
     onSubmit: values => {
       // Handle form submission
       
-      setIsSendLoginRequest(true);
+      setIsSendRegisterRequest(true);
       console.log(values);
     }
   })
 
   useEffect(() => {
-    if (isSendLoginRequest) {
-      // Send login request
+    if (isSendRegisterRequest) {
+      // Send Register request
       const email = formik.values.email;
       const password = formik.values.password;
 
-      const handleLogin = async () => {
-          const res = await performLogin(email, password);
+      const handleRegister = async () => {
+          const res = await performRegister(email, password);
           switch (res.statusCode) {
             case 200:
-              navigate('/taskmanager');
-              localStorage.setItem('token', res.data.access_token);
+            case 201:
+              navigate('/login');
               break;
             default:
               alert('Something went wrong:' + res.data.message);
               break;
           }
-          setIsSendLoginRequest(false);
+          setIsSendRegisterRequest(false);
       };
   
-      handleLogin();
+      handleRegister();
       
     }
     
-  }, [setIsSendLoginRequest, isSendLoginRequest, formik.isSubmitting]);
+  }, [setIsSendRegisterRequest, isSendRegisterRequest, formik.isSubmitting]);
 
   useEffect(() => {
     localStorage.removeItem('token');
@@ -60,7 +60,7 @@ export default function Login({}: Props) {
   return (
     <main className = "flex flex-col items-center justify-center h-screengap-2">
       <div className = "bg-white rounded-lg shadow-lg p-4 min-w-[20em]">
-        <h3 className = "text-xl text-center">Welcome to NodesLater Task Manager</h3>
+        <h3 className = "text-xl text-center">Task Manager account signup</h3>
         
         <form className = "mt-4 space-y-4" onSubmit={formik.handleSubmit}>
           <div className = "space-y-1">
@@ -85,7 +85,7 @@ export default function Login({}: Props) {
             />
             {formik.touched.password && formik.errors.password ? <div className = "text-red-500">{formik.errors.password}</div> : null}
           </div>
-          <button type = "submit" className = "w-full bg-blue-500 text-white px-3 py-2 rounded-md">Login</button>
+          <button type = "submit" className = "w-full bg-blue-500 text-white px-3 py-2 rounded-md">Register</button>
         </form>
       </div>
 
